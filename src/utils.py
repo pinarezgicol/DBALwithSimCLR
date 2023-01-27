@@ -4,7 +4,7 @@ import torchvision
 from simclr.modules.transformations import TransformsSimCLR
 
 
-def load_data(dataset, dataset_dir="./datasets", image_size=224):
+def load_data(dataset, dataset_dir="./datasets", image_size=32):
     if not os.path.exists(dataset_dir):
         os.makedirs(dataset_dir)
 
