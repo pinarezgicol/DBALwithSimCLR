@@ -110,4 +110,4 @@ if __name__ == "__main__":
 
                 pprint(nn_model.get_metrics())
 
-                np.save(args.dataset + '_' + args.network_type + ".npy", nn_model.active_learning_metrics)
+                np.save(os.path.join(args.results_folder, args.dataset + '_' + args.network_type + ".npy"), nn_model.active_learning_metrics)
