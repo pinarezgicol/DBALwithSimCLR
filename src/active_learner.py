@@ -86,7 +86,7 @@ if __name__ == "__main__":
                 batch_size=args.batch_size,
                 query_size=50,
                 iterations=20,
-                # max_sample=5000,
+                max_sample=5000,
                 use_cuda=torch.cuda.is_available(),
             )
             # We will reset the weights at each active learning step.
