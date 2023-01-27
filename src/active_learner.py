@@ -85,6 +85,7 @@ if __name__ == "__main__":
                 active_set,
                 nn_model.predict_on_dataset,
                 heuristic,
+                batch_size=args.batch_size,
                 query_size=10,
                 iterations=100,
                 use_cuda=torch.cuda.is_available(),
