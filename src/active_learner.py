@@ -96,6 +96,9 @@ if __name__ == "__main__":
                                             verbose=0,
                                             device=DEVICE)
 
+            if not os.path.exists(args.results_folder):
+                os.makedirs(args.results_folder)
+
             file_name = os.path.join(args.results_folder, func_name + "_exp_" + str(exp_iter) + ".npy")
             start = time.time()
             acc_arr, dataset_size_arr, y_queried_labels = active_learning_procedure(acquisition_func,
