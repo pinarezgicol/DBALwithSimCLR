@@ -74,7 +74,6 @@ if __name__ == "__main__":
             nn_model = ModelWrapper(nn_model, criterion)
 
             nn_model.add_metric(name='accuracy', initializer=lambda: Accuracy())
-            nn_model.add_metric(name='f1', initializer=lambda: F1Score())
 
             logs = {}
             logs["epoch"] = 0
