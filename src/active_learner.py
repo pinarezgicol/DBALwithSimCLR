@@ -5,8 +5,10 @@ from baal import ActiveLearningDataset
 from baal.modelwrapper import ModelWrapper
 from baal.active import get_heuristic, ActiveLearningLoop
 from baal.bayesian.dropout import patch_module
+from baal.utils.metrics import Accuracy
 from torch import optim
 from torch.nn import CrossEntropyLoss
+from torchmetrics import F1Score
 from tqdm import tqdm
 from acquisition_functions import *
 from models import load_pretrained_model, load_model
@@ -71,6 +73,9 @@ if __name__ == "__main__":
 
             nn_model = ModelWrapper(nn_model, criterion)
 
+            nn_model.add_metric(name='accuracy', initializer=lambda: Accuracy())
+            nn_model.add_metric(name='f1', initializer=lambda: F1Score())
+
             logs = {}
             logs["epoch"] = 0
 
@@ -105,3 +110,5 @@ if __name__ == "__main__":
                     break
 
                 pprint(nn_model.get_metrics())
+
+                np.save(os.path.join(args.results_folder, args.dataset + '_' + args.network_type + ".npy"), nn_model.active_learning_metrics)
