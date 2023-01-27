@@ -79,7 +79,8 @@ if __name__ == "__main__":
                 heuristic,
                 batch_size=args.batch_size,
                 query_size=10,
-                iterations=100,
+                iterations=20,
+                max_sample=5000,
                 use_cuda=torch.cuda.is_available(),
             )
             # We will reset the weights at each active learning step.
@@ -93,7 +94,7 @@ if __name__ == "__main__":
                     optimizer,
                     args.batch_size,
                     args.max_epochs,
-                    torch.cuda.is_available(),
+                    torch.cuda.is_available()
                 )
 
                 # Validation!
