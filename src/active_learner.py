@@ -1,22 +1,16 @@
 import argparse
 from copy import deepcopy
 from pprint import pprint
-
-import torch.cuda
 from baal import ActiveLearningDataset, ModelWrapper
 from baal.active import get_heuristic, ActiveLearningLoop
 from baal.bayesian.dropout import patch_module
 from torch import optim
 from torch.nn import CrossEntropyLoss
 from tqdm import tqdm
-
 from acquisition_functions import *
 from models import load_pretrained_model, load_model
 from utils import *
-from al import *
-import numpy as np
-from skorch import NeuralNetClassifier
-import time
+
 
 if __name__ == "__main__":
     # Instantiate the parser
@@ -32,11 +26,9 @@ if __name__ == "__main__":
 
     parser.add_argument('--dataset', type=str, default="CIFAR10")
 
-    parser.add_argument('--projection_dim', type=int, default=64)
-
     parser.add_argument('--max_epochs', type=int, default=20)
 
-    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--batch_size', type=int, default=128)
 
     parser.add_argument('--learning_rate', type=float, default=0.001)
 
