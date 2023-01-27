@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
             active_set = ActiveLearningDataset(train_dataset, pool_specifics={"transform": TransformsSimCLR(size=32).test_transform})
 
-            active_set.label_randomly(10)
+            active_set.label_randomly(50)
 
             if args.network_type == "Self-Supervised":
                 nn_model = load_pretrained_model(args.resnet, args.model_path, freeze=args.freeze)
@@ -84,15 +84,15 @@ if __name__ == "__main__":
                 nn_model.predict_on_dataset,
                 heuristic,
                 batch_size=args.batch_size,
-                query_size=10,
+                query_size=50,
                 iterations=20,
-                max_sample=5000,
+                # max_sample=5000,
                 use_cuda=torch.cuda.is_available(),
             )
             # We will reset the weights at each active learning step.
             init_weights = deepcopy(nn_model.state_dict())
 
-            for _ in tqdm(range(100)):
+            for _ in tqdm(range(19)):
                 # Load the initial weights.
                 nn_model.load_state_dict(init_weights)
                 nn_model.train_on_dataset(
