@@ -12,7 +12,7 @@ def predictions_from_pool(
         T: Number of MC dropout iterations aka training iterations,
         training: If False, run test without MC dropout. (default=True)
     """
-    random_subset = np.random.choice(range(len(X_pool)), size=5000, replace=False)
+    random_subset = np.random.choice(range(len(X_pool)), size=1000, replace=False)
     with torch.no_grad():
         outputs = np.stack(
             [

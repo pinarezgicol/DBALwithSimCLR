@@ -50,14 +50,14 @@ if __name__ == "__main__":
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
-        batch_size=args.batch_size,
+        batch_size=len(train_dataset),
         shuffle=True,
         drop_last=True
     )
 
     test_loader = torch.utils.data.DataLoader(
         test_dataset,
-        batch_size=args.batch_size,
+        batch_size=len(test_dataset),
         shuffle=False,
         drop_last=True
     )
