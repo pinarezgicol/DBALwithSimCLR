@@ -1,7 +1,8 @@
 import argparse
 from copy import deepcopy
 from pprint import pprint
-from baal import ActiveLearningDataset, ModelWrapper
+from baal import ActiveLearningDataset
+from baal.modelwrapper import ModelWrapper
 from baal.active import get_heuristic, ActiveLearningLoop
 from baal.bayesian.dropout import patch_module
 from torch import optim
