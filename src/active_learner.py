@@ -1,4 +1,15 @@
 import argparse
+from copy import deepcopy
+from pprint import pprint
+
+import torch.cuda
+from baal import ActiveLearningDataset, ModelWrapper
+from baal.active import get_heuristic, ActiveLearningLoop
+from baal.bayesian.dropout import patch_module
+from torch import optim
+from torch.nn import CrossEntropyLoss
+from tqdm import tqdm
+
 from acquisition_functions import *
 from models import load_pretrained_model, load_model
 from utils import *
@@ -23,7 +34,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--projection_dim', type=int, default=64)
 
-    parser.add_argument('--max_epochs', type=int, default=200)
+    parser.add_argument('--max_epochs', type=int, default=20)
 
     parser.add_argument('--batch_size', type=int, default=128)
 
@@ -38,79 +49,64 @@ if __name__ == "__main__":
     if not os.path.exists(args.results_folder):
         os.makedirs(args.results_folder)
 
-    ACQ_FUNCS = {
-        "bald": bald,
-        "var_ratios": var_ratios,
-        "mean_std": mean_std,
-        "max_entropy": max_entropy,
-        "uniform": uniform
-    }
-
-    train_dataset, test_dataset = load_data(dataset=args.dataset)
-
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset,
-        batch_size=len(train_dataset),
-        shuffle=True,
-        drop_last=True
-    )
-
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset,
-        batch_size=len(test_dataset),
-        shuffle=False,
-        drop_last=True
-    )
-
-    X_train, y_train = next(iter(train_loader))
-    X_test, y_test = next(iter(test_loader))
-
-    if args.network_type == "Self-Supervised":
-        nn_model = load_pretrained_model(args.resnet, args.model_path)
-    else:
-        nn_model = load_model(args.resnet)
-
-    number_of_classes = 10
+    ACQ_FUNCS = ["bald", "random", "entropy"]
 
     for exp_iter in range(args.experiment_count):
-        np.random.seed(exp_iter)
-        initial_idx = np.array([], dtype=int)
-        for i in np.unique(y_train).astype(int):
-            idx = np.random.choice(np.where(y_train == i)[0], size=2, replace=False)
-            initial_idx = np.concatenate((initial_idx, idx))
+        for acq_func in ACQ_FUNCS:
+            train_dataset, test_dataset = load_data(dataset=args.dataset)
 
-        for func_name, acquisition_func in ACQ_FUNCS.items():
-            X_initial = X_train[initial_idx]
-            y_initial = np.asarray(y_train)[initial_idx]
+            active_set = ActiveLearningDataset(train_dataset, pool_specifics={"transform": TransformsSimCLR(size=224).test_transform})
 
-            X_pool = np.delete(X_train, initial_idx, axis=0)
-            y_pool = np.delete(y_train, initial_idx, axis=0)
+            active_set.label_randomly(10)
 
-            estimator = NeuralNetClassifier(nn_model,
-                                            max_epochs=args.max_epochs,
-                                            batch_size=args.batch_size,
-                                            lr=args.learning_rate,
-                                            optimizer=torch.optim.Adam,
-                                            criterion=torch.nn.CrossEntropyLoss,
-                                            train_split=None,
-                                            verbose=0,
-                                            device=DEVICE)
+            if args.network_type == "Self-Supervised":
+                nn_model = load_pretrained_model(args.resnet, args.model_path)
+            else:
+                nn_model = load_model(args.resnet)
 
-            if not os.path.exists(args.results_folder):
-                os.makedirs(args.results_folder)
+            number_of_classes = 10
 
-            file_name = os.path.join(args.results_folder, func_name + "_exp_" + str(exp_iter) + ".npy")
-            start = time.time()
-            acc_arr, dataset_size_arr, y_queried_labels = active_learning_procedure(acquisition_func,
-                                                                                    X_test,
-                                                                                    y_test,
-                                                                                    X_pool,
-                                                                                    y_pool,
-                                                                                    X_initial,
-                                                                                    y_initial,
-                                                                                    estimator,
-                                                                                    file_name,
-                                                                                    n_instances=number_of_classes)
+            heuristic = get_heuristic(acq_func, 0.05)
 
-            end = time.time()
-            print("Time Elapsed: ", end-start)
+            criterion = CrossEntropyLoss()
+
+            nn_model = patch_module(nn_model)
+
+            if torch.cuda.is_available():
+                nn_model.cuda()
+            optimizer = optim.SGD(nn_model.parameters(), lr=args.learning_rate, momentum=0.9)
+
+            nn_model = ModelWrapper(nn_model, criterion)
+
+            logs = {}
+            logs["epoch"] = 0
+
+            active_loop = ActiveLearningLoop(
+                active_set,
+                nn_model.predict_on_dataset,
+                heuristic,
+                query_size=10,
+                iterations=100,
+                use_cuda=torch.cuda.is_available(),
+            )
+            # We will reset the weights at each active learning step.
+            init_weights = deepcopy(nn_model.state_dict())
+
+            for _ in tqdm(range(100)):
+                # Load the initial weights.
+                nn_model.load_state_dict(init_weights)
+                nn_model.train_on_dataset(
+                    active_set,
+                    optimizer,
+                    args.batch_size,
+                    args.max_epochs,
+                    torch.cuda.is_available(),
+                )
+
+                # Validation!
+                nn_model.test_on_dataset(test_dataset, args.batch_size, torch.cuda.is_available())
+                should_continue = active_loop.step()
+                if not should_continue:
+                    break
+
+                pprint(nn_model.get_metrics())
