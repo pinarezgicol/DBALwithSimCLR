@@ -8,7 +8,6 @@ from baal.bayesian.dropout import patch_module
 from baal.utils.metrics import Accuracy
 from torch import optim
 from torch.nn import CrossEntropyLoss
-from torchmetrics import F1Score
 from tqdm import tqdm
 from acquisition_functions import *
 from models import load_pretrained_model, load_model
@@ -29,13 +28,15 @@ if __name__ == "__main__":
 
     parser.add_argument('--dataset', type=str, default="CIFAR10")
 
-    parser.add_argument('--max_epochs', type=int, default=20)
+    parser.add_argument('--max_epochs', type=int, default=200)
 
-    parser.add_argument('--batch_size', type=int, default=128)
+    parser.add_argument('--batch_size', type=int, default=256)
 
     parser.add_argument('--learning_rate', type=float, default=0.001)
 
     parser.add_argument('--experiment_count', type=int, default=3)
+
+    parser.add_argument('--freeze', type=bool, default=False)
 
     args = parser.parse_args()
 
@@ -55,7 +56,7 @@ if __name__ == "__main__":
             active_set.label_randomly(10)
 
             if args.network_type == "Self-Supervised":
-                nn_model = load_pretrained_model(args.resnet, args.model_path)
+                nn_model = load_pretrained_model(args.resnet, args.model_path, freeze=args.freeze)
             else:
                 nn_model = load_model(args.resnet)
 
