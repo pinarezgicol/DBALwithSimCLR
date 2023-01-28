@@ -51,7 +51,7 @@ if __name__ == "__main__":
         for acq_func in ACQ_FUNCS:
             train_dataset, test_dataset = load_data(dataset=args.dataset)
 
-            active_set = ActiveLearningDataset(train_dataset, pool_specifics={"transform": TransformsSimCLR(size=32).test_transform})
+            active_set = ActiveLearningDataset(train_dataset, pool_specifics={"transform": TransformsSimCLR(size=train_dataset.data.shape[1]).test_transform})
 
             active_set.label_randomly(50)
 
