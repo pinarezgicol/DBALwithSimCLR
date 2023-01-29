@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--network_type', type=str, default="Self-Supervised")
 
-    parser.add_argument('--resnet', type=str, default="resnet18")
+    parser.add_argument('--classifier_model', type=str, default="resnet18")
 
     parser.add_argument('--model_path', type=str, default=None)
 
@@ -56,9 +56,12 @@ if __name__ == "__main__":
             active_set.label_randomly(50)
 
             if args.network_type == "Self-Supervised":
-                nn_model = load_pretrained_model(args.resnet, args.model_path, freeze=args.freeze)
+                nn_model = load_pretrained_model(args.classifier_model, args.model_path, freeze=args.freeze)
             else:
-                nn_model = load_model(args.resnet)
+                if args.dataset == "CIFAR10":
+                    nn_model = load_model(args.classifier_model, image_size=32)
+                else:
+                    nn_model = load_model(args.classifier_model, image_size=96)
 
             number_of_classes = 10
 
