@@ -8,51 +8,30 @@ import torch.nn.functional as F
 
 
 class ConvNN(nn.Module):
-    def __init__(
-        self,
-        num_filters: int = 32,
-        kernel_size: int = 4,
-        dense_layer: int = 128,
-        img_rows: int = 32,
-        img_cols: int = 32,
-        maxpool: int = 2,
-    ):
-        """
-        Basic Architecture of CNN
-        Attributes:
-            num_filters: Number of filters, out channel for 1st and 2nd conv layers,
-            kernel_size: Kernel size of convolution,
-            dense_layer: Dense layer units,
-            img_rows: Height of input image,
-            img_cols: Width of input image,
-            maxpool: Max pooling size
-        """
+    def __init__(self, dataset):
+        if dataset == "CIFAR10":
+            coef = 5
+        else:
+            coef = 21
         super(ConvNN, self).__init__()
-        self.conv1 = nn.Conv2d(3, num_filters, kernel_size, 1)
-        self.conv2 = nn.Conv2d(num_filters, num_filters, kernel_size, 1)
-        self.dropout1 = nn.Dropout(0.25)
-        self.dropout2 = nn.Dropout(0.5)
-        self.fc1 = nn.Linear(
-            num_filters
-            * ((img_rows - 2 * kernel_size + 2) // 2)
-            * ((img_cols - 2 * kernel_size + 2) // 2),
-            dense_layer,
-        )
-        self.fc2 = nn.Linear(dense_layer, 10)
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * coef * coef, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.conv1(x)
-        x = F.relu(x)
-        x = self.conv2(x)
-        x = F.relu(x)
-        x = F.max_pool2d(x, 2)
-        x = self.dropout1(x)
-        x = torch.flatten(x, 1)
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.dropout2(x)
-        out = self.fc2(x)
-        return out
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(x.size(0), -1)
+        x = F.relu(self.fc1(x))
+        x = nn.Dropout(0.5)(x)
+        x = F.relu(self.fc2(x))
+        x = nn.Dropout(0.25)(x)
+        x = self.fc3(x)
+        return x
+
 
 
 # Pretrained SimCLR model is loaded and only resnet part of it is returned
@@ -80,11 +59,11 @@ def load_pretrained_model(classifier_model, model_path, projection_dim=64, freez
 
 
 # A regular resnet18 model
-def load_model(classifier_model, image_size=32):
+def load_model(classifier_model, dataset="CIFAR10"):
     if classifier_model == "resnet18":
         model = get_resnet(classifier_model, pretrained=False)
     else:
-        model = ConvNN(img_rows=image_size, img_cols=image_size)
+        model = ConvNN(dataset=dataset)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model = model.to(device)

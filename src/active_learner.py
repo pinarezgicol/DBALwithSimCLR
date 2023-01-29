@@ -58,10 +58,7 @@ if __name__ == "__main__":
             if args.network_type == "Self-Supervised":
                 nn_model = load_pretrained_model(args.classifier_model, args.model_path, freeze=args.freeze)
             else:
-                if args.dataset == "CIFAR10":
-                    nn_model = load_model(args.classifier_model, image_size=32)
-                else:
-                    nn_model = load_model(args.classifier_model, image_size=96)
+                nn_model = load_model(args.classifier_model, dataset=args.dataset)
 
             number_of_classes = 10
 
