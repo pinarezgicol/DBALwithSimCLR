@@ -10,7 +10,7 @@ from torch import optim
 from torch.nn import CrossEntropyLoss
 from tqdm import tqdm
 from acquisition_functions import *
-from models import load_pretrained_model, load_model
+from models import load_pretrained_model, load_model, append_dropout
 from utils import *
 
 
@@ -65,6 +65,8 @@ if __name__ == "__main__":
             heuristic = get_heuristic(acq_func, 0.05)
 
             criterion = CrossEntropyLoss()
+
+            append_dropout(nn_model)
 
             nn_model = patch_module(nn_model)
 

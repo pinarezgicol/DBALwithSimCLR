@@ -69,3 +69,12 @@ def load_model(classifier_model, dataset="CIFAR10"):
     model = model.to(device)
 
     return model
+
+
+def append_dropout(model, rate=0.2):
+    for name, module in model.named_children():
+        if len(list(module.children())) > 0:
+            append_dropout(module)
+        if isinstance(module, nn.ReLU):
+            new = nn.Sequential(module, nn.Dropout2d(p=rate, inplace=True))
+            setattr(model, name, new)
