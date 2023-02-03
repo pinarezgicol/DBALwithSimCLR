@@ -58,7 +58,7 @@ def load_model(classifier_model, dataset="CIFAR10"):
     if classifier_model == "resnet18":
         model = get_resnet(classifier_model, pretrained=False)
     else:
-        model = ConvNN(dataset=dataset)
+        model = ConvNN()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model = model.to(device)
