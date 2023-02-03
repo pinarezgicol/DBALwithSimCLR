@@ -66,8 +66,6 @@ if __name__ == "__main__":
 
             criterion = CrossEntropyLoss()
 
-            append_dropout(nn_model)
-
             nn_model = patch_module(nn_model)
 
             if torch.cuda.is_available():
