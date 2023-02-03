@@ -82,41 +82,10 @@ class ResNet_18(nn.Module):
         return x
 
     def identity_downsample(self, in_channels, out_channels):
-
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(out_channels)
         )
-
-    def _make_layer(self, block, planes, blocks, stride=1):
-        downsample = None
-        if stride != 1 or self.inplanes != planes:
-            downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes, kernel_size=1, stride=stride),
-                nn.BatchNorm2d(planes),
-            )
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
-        self.inplanes = planes
-        for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
-
-        return nn.Sequential(*layers)
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.maxpool(x)
-        x = self.layer0(x)
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-
-        x = self.avgpool(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc(x)
-
-        return x
-
 
 # Pretrained SimCLR model is loaded and only resnet part of it is returned
 def load_pretrained_model(classifier_model, model_path, projection_dim=64, freeze=False):
