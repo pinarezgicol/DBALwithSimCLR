@@ -10,7 +10,7 @@ from torch import optim
 from torch.nn import CrossEntropyLoss
 from tqdm import tqdm
 from acquisition_functions import *
-from models import load_pretrained_model, load_model, append_dropout
+from models import load_pretrained_model, load_model
 from utils import *
 
 
