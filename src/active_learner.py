@@ -4,7 +4,7 @@ from pprint import pprint
 from baal import ActiveLearningDataset
 from baal.modelwrapper import ModelWrapper
 from baal.active import get_heuristic, ActiveLearningLoop
-from baal.bayesian.dropout import patch_module
+from baal.bayesian.dropout import patch_module, MCDropoutModule
 from baal.utils.metrics import Accuracy
 from torch import optim
 from torch.nn import CrossEntropyLoss
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
             criterion = CrossEntropyLoss()
 
-            nn_model = patch_module(nn_model)
+            nn_model = MCDropoutModule(nn_model)
 
             if torch.cuda.is_available():
                 nn_model.cuda()
