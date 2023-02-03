@@ -72,7 +72,7 @@ if __name__ == "__main__":
                 nn_model.cuda()
             optimizer = optim.SGD(nn_model.parameters(), lr=args.learning_rate, momentum=0.9)
 
-            nn_model = ModelWrapper(nn_model, criterion)
+            nn_model = ModelWrapper(nn_model, criterion, replicate_in_memory=False)
 
             nn_model.add_metric(name='accuracy', initializer=lambda: Accuracy())
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
                 query_size=50,
                 iterations=20,
                 max_sample=5000,
-                use_cuda=torch.cuda.is_available(),
+                use_cuda=torch.cuda.is_available()
             )
             # We will reset the weights at each active learning step.
             init_weights = deepcopy(nn_model.state_dict())
