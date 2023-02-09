@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # Instantiate the parser
     parser = argparse.ArgumentParser(description='Active Learning Setting')
 
-    parser.add_argument('--network_type', type=str, default="Self-Supervised")
+    parser.add_argument('--self_supervised', type=bool, default=True)
 
     parser.add_argument('--model_path', type=str, default=None)
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
             active_set.label_randomly(50)
 
-            if args.network_type == "Self-Supervised":
+            if args.self_supervised:
                 nn_model = load_pretrained_model(args.model_path, freeze=args.freeze)
             else:
                 nn_model = load_model(args.dropout)
@@ -111,4 +111,4 @@ if __name__ == "__main__":
 
                 pprint(nn_model.get_metrics())
 
-                np.save(os.path.join(args.results_folder, getResultPath(args.dataset, args.network_type, acq_func, exp_iter, args.freeze)), nn_model.active_learning_metrics)
+                np.save(os.path.join(args.results_folder, getResultPath(args.dataset, args.self_supervised, acq_func, exp_iter, args.freeze)), nn_model.active_learning_metrics)
