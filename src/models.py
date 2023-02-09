@@ -88,8 +88,8 @@ class ResNet_18(nn.Module):
         )
 
 # Pretrained SimCLR model is loaded and only resnet part of it is returned
-def load_pretrained_model(classifier_model, model_path, projection_dim=64, freeze=False):
-    encoder = get_resnet(classifier_model, pretrained=False)
+def load_pretrained_model(model_path, projection_dim=64, freeze=False):
+    encoder = ResNet_18(3, 10)
     n_features = encoder.fc.in_features
 
     simclr_model = SimCLR(encoder, projection_dim, n_features)
@@ -104,7 +104,7 @@ def load_pretrained_model(classifier_model, model_path, projection_dim=64, freez
         for param in resnet_model.parameters():
             param.requires_grad = False
 
-    resnet_model.fc = get_resnet(classifier_model, pretrained=False).fc
+    resnet_model.fc = ResNet_18(3, 10).fc
 
     resnet_model = resnet_model.to(device)
 
@@ -112,11 +112,11 @@ def load_pretrained_model(classifier_model, model_path, projection_dim=64, freez
 
 
 # A regular resnet18 model
-def load_model(classifier_model, dataset="CIFAR10"):
-    if classifier_model == "resnet18":
-        model = get_resnet(classifier_model, pretrained=False)
-    else:
+def load_model(dropout=True):
+    if dropout:
         model = ResNet_18(3, 10)
+    else:
+        model = get_resnet('resnet18', pretrained=False)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model = model.to(device)

@@ -4,6 +4,13 @@ import torchvision
 from simclr.modules.transformations import TransformsSimCLR
 
 
+def getResultPath(dataset, network_type, acq_func, exp_iter, freeze=False):
+    if freeze:
+        return dataset + '_' + network_type + "_freeze" + "_acq_func" + acq_func + "_exp" + str(
+            exp_iter) + ".npy"
+    return dataset + '_' + network_type + "_acq_func" + acq_func + "_exp" + str(exp_iter) + ".npy"
+
+
 def load_data(dataset, dataset_dir="./datasets"):
     if not os.path.exists(dataset_dir):
         os.makedirs(dataset_dir)

@@ -20,8 +20,6 @@ if __name__ == "__main__":
 
     parser.add_argument('--network_type', type=str, default="Self-Supervised")
 
-    parser.add_argument('--classifier_model', type=str, default="resnet18")
-
     parser.add_argument('--model_path', type=str, default=None)
 
     parser.add_argument('--results_folder', type=str)
@@ -37,6 +35,8 @@ if __name__ == "__main__":
     parser.add_argument('--experiment_count', type=int, default=3)
 
     parser.add_argument('--freeze', type=bool, default=False)
+
+    parser.add_argument('--dropout', type=bool, default=True)
 
     args = parser.parse_args()
 
@@ -56,9 +56,9 @@ if __name__ == "__main__":
             active_set.label_randomly(50)
 
             if args.network_type == "Self-Supervised":
-                nn_model = load_pretrained_model(args.classifier_model, args.model_path, freeze=args.freeze)
+                nn_model = load_pretrained_model(args.model_path, freeze=args.freeze)
             else:
-                nn_model = load_model(args.classifier_model, dataset=args.dataset)
+                nn_model = load_model(args.dropout)
 
             number_of_classes = 10
 
@@ -111,4 +111,4 @@ if __name__ == "__main__":
 
                 pprint(nn_model.get_metrics())
 
-                np.save(os.path.join(args.results_folder, args.dataset + '_' + args.network_type + "_acq_func" + acq_func + "_exp" + str(exp_iter) + ".npy"), nn_model.active_learning_metrics)
+                np.save(os.path.join(args.results_folder, getResultPath(args.dataset, args.network_type, acq_func, exp_iter, args.freeze)), nn_model.active_learning_metrics)
