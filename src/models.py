@@ -20,14 +20,14 @@ class Block(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        x = nn.Dropout(0.5)(x)
+        x = nn.Dropout(0.1)(x)
         x = self.conv2(x)
         x = self.bn2(x)
         if self.identity_downsample is not None:
             identity = self.identity_downsample(identity)
         x += identity
         x = self.relu(x)
-        x = nn.Dropout(0.5)(x)
+        x = nn.Dropout(0.1)(x)
         return x
 
 
@@ -40,7 +40,7 @@ class ResNet_18(nn.Module):
         self.conv1 = nn.Conv2d(image_channels, 64, kernel_size=7, stride=2, padding=3)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.1)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         # resnet layers
