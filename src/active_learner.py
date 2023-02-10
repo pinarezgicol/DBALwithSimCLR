@@ -52,8 +52,8 @@ if __name__ == "__main__":
             train_dataset, test_dataset = load_data(dataset=args.dataset)
 
             if args.dataset == "CIFAR10":
-                train_dataset.data = train_dataset.data.reshape(0, 3, 1, 2)
-                test_dataset.data = test_dataset.data.reshape(0, 3, 1, 2)
+                #train_dataset.data = train_dataset.data.transpose(0, 3, 1, 2)
+                test_dataset.data = test_dataset.data.transpose(0, 3, 1, 2)
 
             active_set = ActiveLearningDataset(train_dataset, pool_specifics={"transform": TransformsSimCLR(size=train_dataset.data.shape[2]).test_transform})
 
